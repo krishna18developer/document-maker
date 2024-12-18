@@ -95,41 +95,43 @@ export async function POST(req: Request): Promise<NextResponse<SendMailResponse>
           personalizedBody = personalizedBody.replace(placeholder, value);
         });
 
-        // Create email content
-        const parts = [
+        const emailHeaders = [
           "MIME-Version: 1.0",
-          "Content-Type: text/html; charset=utf-8",
+          certificatesData?.[i] 
+            ? `Content-Type: multipart/mixed; boundary=certificate_boundary`
+            : "Content-Type: text/html; charset=utf-8",
           `From: ${session.user.name} <${session.user.email}>`,
           `To: ${recipientEmail}`,
           bcc ? `Bcc: ${bcc}` : '',
-          `Subject: ${personalizedSubject}`,
-          "",
-          personalizedBody
-        ];
-
-        // Add certificate if available
+          `Subject: ${personalizedSubject}`
+        ].filter(Boolean).join("\r\n");
+        
+        let mimeEmail;
         if (certificatesData?.[i]) {
-          const boundary = "certificate_boundary";
-          parts[1] = `Content-Type: multipart/mixed; boundary=${boundary}`;
-          parts.push(
-            `--${boundary}`,
+          mimeEmail = [
+            emailHeaders,
+            "",
+            "--certificate_boundary",
             "Content-Type: text/html; charset=utf-8",
             "",
             personalizedBody,
             "",
-            `--${boundary}`,
+            "--certificate_boundary",
             "Content-Type: image/png",
             "Content-Transfer-Encoding: base64",
             `Content-Disposition: attachment; filename="certificate-${recipientEmail}.png"`,
             "",
             certificatesData[i],
             "",
-            `--${boundary}--`
-          );
+            "--certificate_boundary--"
+          ].join("\r\n");
+        } else {
+          mimeEmail = [
+            emailHeaders,
+            "",
+            personalizedBody
+          ].join("\r\n");
         }
-
-        const mimeEmail = parts.join("\r\n");
-
         const encodedEmail = Buffer.from(mimeEmail)
           .toString("base64")
           .replace(/\+/g, '-')

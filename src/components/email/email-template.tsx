@@ -1,20 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { useCertificate } from "@/context/certificate-context";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { useCertificate } from "@/context/certificate-context";
+
+interface EmailConfig {
+  subject: string;
+  body: string;
+  bcc: string;
+}
 
 export function EmailTemplate() {
   const { csvData, emailConfig, setEmailConfig } = useCertificate();
 
   const insertField = (field: string, target: 'subject' | 'body') => {
-    setEmailConfig(prev => ({
-      ...prev,
-      [target]: prev[target] + ` {${field}}`
-    }));
+    const textArea = target === 'body' ? document.getElementById('email-body') as HTMLTextAreaElement : null;
+    
+    if (target === 'body' && textArea) {
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const currentValue = emailConfig[target];
+      const newValue = currentValue.substring(0, start) + 
+        `{${field}}` + 
+        currentValue.substring(end);
+      
+      setEmailConfig((prev: EmailConfig) => ({
+        ...prev,
+        [target]: newValue
+      }));
+      
+      // Restore cursor position after update
+      setTimeout(() => {
+        textArea.focus();
+        textArea.setSelectionRange(start + field.length + 2, start + field.length + 2);
+      }, 0);
+    } else {
+      setEmailConfig((prev: EmailConfig) => ({
+        ...prev,
+        [target]: prev[target] + `{${field}}`
+      }));
+    }
   };
 
   return (
@@ -36,7 +63,10 @@ export function EmailTemplate() {
         <div className="flex gap-2 items-center">
           <Input
             value={emailConfig.subject}
-            onChange={(e) => setEmailConfig(prev => ({ ...prev, subject: e.target.value }))}
+            onChange={(e) => setEmailConfig((prev: EmailConfig) => ({ 
+              ...prev, 
+              subject: e.target.value 
+            }))}
             placeholder="Email subject..."
           />
           <div className="flex gap-1">
@@ -55,19 +85,14 @@ export function EmailTemplate() {
       </div>
 
       <div className="space-y-2">
-        <Label>BCC (comma-separated emails)</Label>
-        <Input
-          value={emailConfig.bcc}
-          onChange={(e) => setEmailConfig(prev => ({ ...prev, bcc: e.target.value }))}
-          placeholder="email1@example.com, email2@example.com"
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label>Email Body</Label>
         <Textarea
+          id="email-body"
           value={emailConfig.body}
-          onChange={(e) => setEmailConfig(prev => ({ ...prev, body: e.target.value }))}
+          onChange={(e) => setEmailConfig((prev: EmailConfig) => ({ 
+            ...prev, 
+            body: e.target.value 
+          }))}
           className="h-[200px]"
           placeholder="Enter your email template..."
         />
