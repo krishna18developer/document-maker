@@ -10,7 +10,7 @@ export function CertificateGenerator() {
   const { elements, backgroundImage, csvData } = useCertificate();
   const [generating, setGenerating] = useState(false);
 
-  const generateCertificate = async (rowData: string[], rowIndex: number) => {
+  const generateCertificate = async (rowData: string[], _rowIndex: number) => {
     const canvas = document.createElement('canvas');
     canvas.width = 842; // A4 width at 96 DPI
     canvas.height = 595; // A4 height at 96 DPI

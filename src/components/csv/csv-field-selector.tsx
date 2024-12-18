@@ -1,7 +1,6 @@
 "use client";
 
 import { useCertificate } from "@/context/certificate-context";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export function CSVFieldSelector() {
