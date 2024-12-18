@@ -1,8 +1,10 @@
 import { CertificateProvider } from "@/context/certificate-context";
 import { CertificateCanvas } from "@/components/certificate/certificate-canvas";
+import { CertificateUploader } from "@/components/certificate/certificate-uploader";
 import { CSVUploader } from "@/components/csv/csv-uploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CSVFieldSelector } from "@/components/csv/csv-field-selector";
+import { PreviewSelector } from "@/components/csv/preview-selector";
 
 export default function Home() {
   return (
@@ -12,22 +14,13 @@ export default function Home() {
           <h1 className="text-4xl font-bold">Certificate Generator</h1>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Certificate Editor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CertificateCanvas />
-          </CardContent>
-        </Card>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Available Fields</CardTitle>
+              <CardTitle>Certificate Template</CardTitle>
             </CardHeader>
             <CardContent>
-              <CSVFieldSelector />
+              <CertificateUploader />
             </CardContent>
           </Card>
 
@@ -40,6 +33,27 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Certificate Editor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CertificateCanvas />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Fields</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <CSVFieldSelector />
+              <PreviewSelector />
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </CertificateProvider>
   );

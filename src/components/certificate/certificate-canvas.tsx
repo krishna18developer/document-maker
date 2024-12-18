@@ -1,66 +1,74 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-interface TextElement {
-  id: string;
-  text: string;
-  x: number;
-  y: number;
-  fontSize: number;
-  fontFamily: string;
-  color: string;
-  isDragging: boolean;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCertificate } from "@/context/certificate-context";
 
 export function CertificateCanvas() {
+  const {
+    elements,
+    setElements,
+    selectedElement,
+    setSelectedElement,
+    backgroundImage,
+    csvData,
+    previewRow
+  } = useCertificate();
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [elements, setElements] = useState<TextElement[]>([]);
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
 
-  const fonts = [
-    "Arial",
-    "Times New Roman",
-    "Courier New",
-    "Georgia",
-    "Verdana"
-  ];
+  // Load and draw background image
+  useEffect(() => {
+    if (backgroundImage) {
+      const img = new Image();
+      img.src = backgroundImage;
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+    }
+  }, [backgroundImage]);
 
+  // Draw elements with CSV data
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw background image if exists
+    // Redraw background
     if (backgroundImage) {
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      const img = new Image();
+      img.src = backgroundImage;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     }
 
-    // Draw text elements
+    // Draw elements
     elements.forEach((element) => {
       ctx.font = `${element.fontSize}px ${element.fontFamily}`;
       ctx.fillStyle = element.color;
-      ctx.fillText(element.text, element.x, element.y);
+      
+      // Replace placeholder with actual CSV data if available
+      let displayText = element.text;
+      if (element.columnKey && csvData && csvData.rows[previewRow]) {
+        const columnIndex = csvData.headers.indexOf(element.columnKey);
+        if (columnIndex !== -1) {
+          displayText = csvData.rows[previewRow][columnIndex];
+        }
+      }
 
-      // Draw selection box if element is selected
+      ctx.fillText(displayText, element.x, element.y);
+
       if (selectedElement === element.id) {
-        const metrics = ctx.measureText(element.text);
+        const metrics = ctx.measureText(displayText);
         ctx.strokeStyle = "#00ff00";
         ctx.lineWidth = 1;
         ctx.strokeRect(
@@ -71,22 +79,7 @@ export function CertificateCanvas() {
         );
       }
     });
-  }, [elements, selectedElement, backgroundImage]);
-
-  const addTextElement = () => {
-    const newElement: TextElement = {
-      id: `text-${Date.now()}`,
-      text: "Sample Text",
-      x: 100,
-      y: 100,
-      fontSize: 24,
-      fontFamily: "Arial",
-      color: "#000000",
-      isDragging: false,
-    };
-    setElements([...elements, newElement]);
-    setSelectedElement(newElement.id);
-  };
+  }, [elements, selectedElement, backgroundImage, csvData, previewRow]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -96,7 +89,6 @@ export function CertificateCanvas() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Check if clicked on any element
     elements.forEach((element) => {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
@@ -160,8 +152,6 @@ export function CertificateCanvas() {
       </div>
 
       <div className="space-y-4">
-        <Button onClick={addTextElement}>Add Text Element</Button>
-
         {selectedElement && (
           <div className="space-y-4">
             <div>
@@ -194,7 +184,7 @@ export function CertificateCanvas() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {fonts.map((font) => (
+                  {["Arial", "Times New Roman", "Courier New", "Georgia", "Verdana"].map((font) => (
                     <SelectItem key={font} value={font}>
                       {font}
                     </SelectItem>
