@@ -1,20 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCertificate } from "@/context/certificate-context";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-type CSVData = {
-  headers: string[];
-  rows: string[][];
-};
-
 export function CSVUploader() {
-  const [csvData, setCsvData] = useState<CSVData | null>(null);
+  const { csvData, setCsvData } = useCertificate();
 
-  const parseCSV = (text: string): CSVData => {
+  const parseCSV = (text: string) => {
     const lines = text.split('\n');
     const headers = lines[0].split(',').map(header => header.trim());
     const rows = lines.slice(1)
@@ -35,7 +30,7 @@ export function CSVUploader() {
       };
       reader.readAsText(file);
     }
-  }, []);
+  }, [setCsvData]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

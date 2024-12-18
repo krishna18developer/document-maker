@@ -13,26 +13,6 @@ export default function Home() {
         <div className="flex justify-between items-center">
           <h1 className="text-4xl font-bold">Certificate Generator</h1>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Certificate Template</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CertificateUploader />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>CSV Data Import</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CSVUploader />
-            </CardContent>
-          </Card>
-        </div>
 
         <Card>
           <CardHeader>
@@ -43,17 +23,37 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Fields</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <CSVFieldSelector />
-              <PreviewSelector />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Certificate Template</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[200px]">
+              <CertificateUploader />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>CSV Data Import</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[200px] overflow-auto">
+              <CSVUploader />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Fields</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[200px] overflow-auto">
+              <div className="space-y-4">
+                <CSVFieldSelector />
+                <PreviewSelector />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </CertificateProvider>
   );
