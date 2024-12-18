@@ -19,6 +19,12 @@ interface CSVData {
   rows: string[][];
 }
 
+interface EmailConfig {
+  subject: string;
+  body: string;
+  bcc: string;
+}
+
 interface CertificateContextType {
   elements: TextElement[];
   setElements: (elements: TextElement[]) => void;
@@ -30,12 +36,8 @@ interface CertificateContextType {
   setCsvData: (data: CSVData | null) => void;
   previewRow: number;
   setPreviewRow: (index: number) => void;
-  emailConfig: {
-    subject: string;
-    body: string;
-    bcc: string;
-  };
-  setEmailConfig: (config: any) => void;
+  emailConfig: EmailConfig;
+  setEmailConfig: (config: EmailConfig) => void;
 }
 
 const CertificateContext = createContext<CertificateContextType | undefined>(undefined);

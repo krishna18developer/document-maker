@@ -3,9 +3,17 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
+interface AuthUser {
+  name?: string;
+  email?: string;
+  image?: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 interface AuthContextType {
-  user: any;
   isAuthenticated: boolean;
+  user: AuthUser | null;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -14,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     if (session?.user) {

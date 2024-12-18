@@ -95,7 +95,7 @@ export function EmailSender() {
 
       // Generate all certificates first
       const certificatesData = await Promise.all(
-        csvData.rows.map(async (row, _index) => {
+        csvData.rows.map(async (row) => {
           const certificate = await generateCertificate(row, elements, backgroundImage, csvData.headers);
           return certificate?.split("base64,")[1];
         })

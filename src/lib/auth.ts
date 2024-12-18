@@ -6,13 +6,12 @@ import { Session } from "next-auth";
 declare module "next-auth" {
   interface Session {
     user: {
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      profile?: any;
-      accessToken?: string;
+      name: string;
+      email: string;
+      profile: GoogleProfile;
+      image: string;
+      accessToken: string;
       refreshToken?: string;
-      accessTokenExpires?: number;
     }
   }
 }
@@ -22,6 +21,16 @@ interface ExtendedToken extends JWT {
   accessToken?: string;
   refreshToken?: string;
   profile?: any;
+}
+
+interface GoogleProfile {
+  email: string;
+  email_verified: boolean;
+  name: string;
+  picture: string;
+  sub: string;
+  accessToken: string;
+  refreshToken?: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -62,7 +71,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.accessToken = token.accessToken as string;
         session.user.refreshToken = token.refreshToken as string;
-        session.user.profile = token.profile;
+        session.user.profile = token.profile as GoogleProfile;
       }
       return session;
     },
