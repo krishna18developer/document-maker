@@ -2,7 +2,6 @@
 
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCertificate } from "@/context/certificate-context";
 
