@@ -95,7 +95,7 @@ export function EmailSender() {
 
       // Generate all certificates first
       const certificatesData = await Promise.all(
-        csvData.rows.map(async (row, _index) => {
+        csvData.rows.map(async (row) => {
           const certificate = await generateCertificate(row, elements, backgroundImage, csvData.headers);
           return certificate?.split("base64,")[1];
         })
@@ -148,13 +148,13 @@ export function EmailSender() {
       }
 
       toast({
-        title: "Certificates Sent",
-        description: data.summary 
-          ? `Successfully sent ${data.summary.successful} out of ${data.summary.total} certificates.${
-              data.summary.failed ? ` (${data.summary.failed} failed)` : ''
-            }`
+        title: data.summary?.failed 
+          ? `Sent with issues: ${data.summary.successful}/${data.summary.total} successful` 
           : "Certificates sent successfully",
-        variant: data.summary?.failed ? "warning" : "default",
+        variant: data.summary?.failed ? "default" : "default",
+        description: data.summary?.failed 
+          ? `Failed to send ${data.summary.failed} certificates. Check console for details.` 
+          : undefined,
         duration: 5000,
       });
     } catch (error) {
@@ -213,7 +213,7 @@ export function EmailSender() {
       toast({
         title: "Emails Sent",
         description: `Successfully sent ${data.summary.successful} out of ${data.summary.total} emails`,
-        variant: data.summary?.failed ? "warning" : "default",
+        variant: data.summary?.failed ? "destructive" : "default",
       });
     } catch (error) {
       console.error("Email sending error:", error);

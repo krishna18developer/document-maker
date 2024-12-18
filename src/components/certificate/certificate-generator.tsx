@@ -10,7 +10,7 @@ export function CertificateGenerator() {
   const { elements, backgroundImage, csvData } = useCertificate();
   const [generating, setGenerating] = useState(false);
 
-  const generateCertificate = async (rowData: string[], _rowIndex: number) => {
+  const generateCertificate = async (rowData: string[]) => {
     const canvas = document.createElement('canvas');
     canvas.width = 842; // A4 width at 96 DPI
     canvas.height = 595; // A4 height at 96 DPI
@@ -60,7 +60,7 @@ export function CertificateGenerator() {
           ? `certificate_${row[nameColumn].replace(/\s+/g, '_')}.png`
           : `certificate_${i + 1}.png`;
         
-        const certificateData = await generateCertificate(row, i);
+        const certificateData = await generateCertificate(row);
         if (certificateData) {
           const base64Data = certificateData.split(',')[1];
           zip.file(fileName, base64Data, { base64: true });
