@@ -32,6 +32,14 @@ interface SendMailResponse {
   error?: string;
 }
 
+// Helper function to convert plain text to HTML
+const textToHtml = (text: string) => {
+  return text
+    .replace(/\n/g, '<br>')
+    .replace(/\r/g, '')
+    .replace(/\s{2,}/g, ' &nbsp;');
+};
+
 export async function POST(req: Request): Promise<NextResponse<SendMailResponse>> {
   try {
     const session = await getServerSession(authOptions);
@@ -95,6 +103,9 @@ export async function POST(req: Request): Promise<NextResponse<SendMailResponse>
           personalizedBody = personalizedBody.replace(placeholder, value);
         });
 
+        // Convert body to HTML
+        const htmlBody = textToHtml(personalizedBody);
+
         const emailHeaders = [
           "MIME-Version: 1.0",
           certificatesData?.[i] 
@@ -114,7 +125,7 @@ export async function POST(req: Request): Promise<NextResponse<SendMailResponse>
             "--certificate_boundary",
             "Content-Type: text/html; charset=utf-8",
             "",
-            personalizedBody,
+            htmlBody,
             "",
             "--certificate_boundary",
             "Content-Type: image/png",
@@ -129,7 +140,7 @@ export async function POST(req: Request): Promise<NextResponse<SendMailResponse>
           mimeEmail = [
             emailHeaders,
             "",
-            personalizedBody
+            htmlBody
           ].join("\r\n");
         }
         const encodedEmail = Buffer.from(mimeEmail)
