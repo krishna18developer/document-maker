@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCertificate } from "@/context/certificate-context";
 import { useAuth } from "@/context/auth-context";
 
-export function EmailSender() {
+export function EmailSender({ emailConfig }) {
   const { csvData, elements, backgroundImage } = useCertificate();
   const { user, isAuthenticated, signIn } = useAuth();
   const { toast } = useToast();
@@ -38,7 +38,7 @@ export function EmailSender() {
           csvData,
           elements,
           backgroundImage,
-          emailTemplate,
+          emailConfig,
         }),
       });
 

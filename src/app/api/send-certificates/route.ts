@@ -9,7 +9,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { csvData, elements, backgroundImage, emailTemplate } = await req.json();
+  const { csvData, elements, backgroundImage, emailConfig } = await req.json();
+  const { subject, body: emailTemplate, bcc } = emailConfig;
 
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -38,23 +39,30 @@ export async function POST(req: Request) {
       if (emailIndex === -1) continue;
 
       const recipientEmail = row[emailIndex];
+      let personalizedSubject = subject;
       let personalizedTemplate = emailTemplate;
 
-      // Replace placeholders with actual data
+      // Replace placeholders in subject and body
       csvData.headers.forEach((header, index) => {
+        const value = row[index];
+        personalizedSubject = personalizedSubject.replace(
+          new RegExp(`{${header}}`, "g"),
+          value
+        );
         personalizedTemplate = personalizedTemplate.replace(
           new RegExp(`{${header}}`, "g"),
-          row[index]
+          value
         );
       });
 
       // Generate certificate
       const certificate = await generateCertificate(row, elements, backgroundImage);
 
-      await transporter.sendMail({
+      const mailOptions = {
         from: session.user.email,
         to: recipientEmail,
-        subject: "Your Certificate",
+        bcc: bcc ? bcc.split(',').map(email => email.trim()) : [],
+        subject: personalizedSubject,
         text: personalizedTemplate,
         attachments: [
           {
@@ -63,7 +71,9 @@ export async function POST(req: Request) {
             encoding: "base64",
           },
         ],
-      });
+      };
+
+      await transporter.sendMail(mailOptions);
     }
 
     return NextResponse.json({ success: true });
