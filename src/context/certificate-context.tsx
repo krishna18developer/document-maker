@@ -37,7 +37,7 @@ interface CertificateContextType {
   previewRow: number;
   setPreviewRow: (index: number) => void;
   emailConfig: EmailConfig;
-  setEmailConfig: (config: EmailConfig) => void;
+  setEmailConfig: (config: EmailConfig | ((prev: EmailConfig) => EmailConfig)) => void;
 }
 
 const CertificateContext = createContext<CertificateContextType | undefined>(undefined);
