@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CSVFieldSelector } from "@/components/csv/csv-field-selector";
 import { PreviewSelector } from "@/components/csv/preview-selector";
 import { CertificateGenerator } from "@/components/certificate/certificate-generator";
+import { EmailTemplate } from "@/components/email/email-template";
+import { EmailSender } from "@/components/email/email-sender";
 
 export default function Home() {
   return (
@@ -61,6 +63,26 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <CertificateGenerator />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Template</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EmailTemplate />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Send Certificates</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EmailSender />
             </CardContent>
           </Card>
         </div>
