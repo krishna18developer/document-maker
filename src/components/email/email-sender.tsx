@@ -180,6 +180,54 @@ export function EmailSender() {
     }
   };
 
+  const sendEmailsOnly = async () => {
+    if (!isAuthenticated || !csvData?.rows?.length) {
+      return;
+    }
+
+    try {
+      validateEmailConfig();
+      setSending(true);
+      setProgress("Sending emails...");
+      
+      const payload = {
+        csvData,
+        certificatesData: null, // Indicate no certificates
+        emailConfig,
+      };
+
+      const response = await fetch("/api/send-certificates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to send emails');
+      }
+
+      toast({
+        title: "Emails Sent",
+        description: `Successfully sent ${data.summary.successful} out of ${data.summary.total} emails`,
+        variant: data.summary?.failed ? "warning" : "default",
+      });
+    } catch (error) {
+      console.error("Email sending error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send emails",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
+      setProgress("");
+    }
+  };
+
   return (
     <div className="space-y-4">
       {!isAuthenticated ? (
@@ -188,6 +236,14 @@ export function EmailSender() {
         </Button>
       ) : (
         <div className="space-y-2">
+          <Button 
+            onClick={sendEmailsOnly} 
+            disabled={sending || !csvData?.rows?.length}
+            variant="outline"
+            className="w-full"
+          >
+            {sending ? "Sending..." : "Send Emails Only"}
+          </Button>
           <Button 
             onClick={sendEmails} 
             disabled={sending || !csvData?.rows?.length || !backgroundImage}

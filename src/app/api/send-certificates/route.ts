@@ -77,51 +77,58 @@ export async function POST(req: Request): Promise<NextResponse<SendMailResponse>
       );
       
       const recipientEmail = row[emailIndex];
-      const certificateData = certificatesData[i];
-
-      if (!certificateData) {
-        failedSends.push({
-          email: recipientEmail,
-          error: 'Certificate generation failed'
-        });
-        continue;
-      }
 
       try {
-        // Personalize email content
+        // Create a mapping of placeholders to values
+        const placeholderMap = csvData.headers.reduce((acc, header, index) => {
+          acc[header.toLowerCase()] = row[index] || '';
+          return acc;
+        }, {} as Record<string, string>);
+
+        // Replace placeholders in subject and body
         let personalizedSubject = subject;
         let personalizedBody = emailTemplate;
-        csvData.headers.forEach((header, index) => {
-          const value = row[index] || '';
-          const placeholder = new RegExp(`{${header}}`, "g");
+
+        Object.entries(placeholderMap).forEach(([key, value]) => {
+          const placeholder = new RegExp(`{${key}}`, "gi");
           personalizedSubject = personalizedSubject.replace(placeholder, value);
           personalizedBody = personalizedBody.replace(placeholder, value);
         });
 
         // Create email content
-        const boundary = "certificate_boundary";
-        const mimeEmail = [
-          "Content-Type: multipart/mixed; boundary=" + boundary,
+        const parts = [
           "MIME-Version: 1.0",
+          "Content-Type: text/html; charset=utf-8",
           `From: ${session.user.name} <${session.user.email}>`,
           `To: ${recipientEmail}`,
           bcc ? `Bcc: ${bcc}` : '',
           `Subject: ${personalizedSubject}`,
           "",
-          "--" + boundary,
-          "Content-Type: text/html; charset=utf-8",
-          "",
-          personalizedBody,
-          "",
-          "--" + boundary,
-          "Content-Type: image/png",
-          "Content-Transfer-Encoding: base64",
-          `Content-Disposition: attachment; filename="certificate-${recipientEmail}.png"`,
-          "",
-          certificateData,
-          "",
-          "--" + boundary + "--"
-        ].join("\r\n");
+          personalizedBody
+        ];
+
+        // Add certificate if available
+        if (certificatesData?.[i]) {
+          const boundary = "certificate_boundary";
+          parts[1] = `Content-Type: multipart/mixed; boundary=${boundary}`;
+          parts.push(
+            `--${boundary}`,
+            "Content-Type: text/html; charset=utf-8",
+            "",
+            personalizedBody,
+            "",
+            `--${boundary}`,
+            "Content-Type: image/png",
+            "Content-Transfer-Encoding: base64",
+            `Content-Disposition: attachment; filename="certificate-${recipientEmail}.png"`,
+            "",
+            certificatesData[i],
+            "",
+            `--${boundary}--`
+          );
+        }
+
+        const mimeEmail = parts.join("\r\n");
 
         const encodedEmail = Buffer.from(mimeEmail)
           .toString("base64")
