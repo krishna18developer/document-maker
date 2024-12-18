@@ -30,6 +30,12 @@ interface CertificateContextType {
   setCsvData: (data: CSVData | null) => void;
   previewRow: number;
   setPreviewRow: (index: number) => void;
+  emailConfig: {
+    subject: string;
+    body: string;
+    bcc: string;
+  };
+  setEmailConfig: (config: any) => void;
 }
 
 const CertificateContext = createContext<CertificateContextType | undefined>(undefined);
@@ -40,6 +46,11 @@ export function CertificateProvider({ children }: { children: React.ReactNode })
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [csvData, setCsvData] = useState<CSVData | null>(null);
   const [previewRow, setPreviewRow] = useState(0);
+  const [emailConfig, setEmailConfig] = useState({
+    subject: "Your Certificate",
+    bcc: "",
+    body: `Dear {name},\n\nPlease find attached your certificate.\n\nBest regards,\n{sender_name}`
+  });
 
   return (
     <CertificateContext.Provider
@@ -54,6 +65,8 @@ export function CertificateProvider({ children }: { children: React.ReactNode })
         setCsvData,
         previewRow,
         setPreviewRow,
+        emailConfig,
+        setEmailConfig,
       }}
     >
       {children}

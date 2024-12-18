@@ -8,17 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
 export function EmailTemplate() {
-  const { csvData } = useCertificate();
-  const [emailConfig, setEmailConfig] = useState({
-    subject: "Your Certificate",
-    bcc: "",
-    body: `Dear {name},
-
-Please find attached your certificate.
-
-Best regards,
-{sender_name}`
-  });
+  const { csvData, emailConfig, setEmailConfig } = useCertificate();
 
   const insertField = (field: string, target: 'subject' | 'body') => {
     setEmailConfig(prev => ({
