@@ -5,6 +5,7 @@ import { CSVUploader } from "@/components/csv/csv-uploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CSVFieldSelector } from "@/components/csv/csv-field-selector";
 import { PreviewSelector } from "@/components/csv/preview-selector";
+import { CertificateGenerator } from "@/components/certificate/certificate-generator";
 
 export default function Home() {
   return (
@@ -51,6 +52,15 @@ export default function Home() {
                 <CSVFieldSelector />
                 <PreviewSelector />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Generate Certificates</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CertificateGenerator />
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -81,13 +81,15 @@ export function CertificateCanvas() {
     });
   }, [elements, selectedElement, backgroundImage, csvData, previewRow]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
 
     elements.forEach((element) => {
       const ctx = canvas.getContext("2d");
@@ -95,11 +97,12 @@ export function CertificateCanvas() {
 
       ctx.font = `${element.fontSize}px ${element.fontFamily}`;
       const metrics = ctx.measureText(element.text);
+      const elementHeight = element.fontSize;
       
       if (
-        x >= element.x &&
-        x <= element.x + metrics.width &&
-        y >= element.y - element.fontSize &&
+        x >= element.x - metrics.width / 2 &&
+        x <= element.x + metrics.width / 2 &&
+        y >= element.y - elementHeight &&
         y <= element.y
       ) {
         setSelectedElement(element.id);
@@ -110,17 +113,19 @@ export function CertificateCanvas() {
         );
       }
     });
-  };
+  }, [elements, setElements, setSelectedElement]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!selectedElement) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
 
     setElements(
       elements.map((el) =>
@@ -129,7 +134,7 @@ export function CertificateCanvas() {
           : el
       )
     );
-  };
+  }, [selectedElement, elements, setElements]);
 
   const handleMouseUp = () => {
     setElements(
