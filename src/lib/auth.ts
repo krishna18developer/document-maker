@@ -46,9 +46,7 @@ export const authOptions: NextAuthOptions = {
           scope: [
             "openid",
             "email",
-            "profile",
-            "https://www.googleapis.com/auth/gmail.compose",
-            "https://www.googleapis.com/auth/gmail.send"
+            "profile"
           ].join(" ")
         }
       }
